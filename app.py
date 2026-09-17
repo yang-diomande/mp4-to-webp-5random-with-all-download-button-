@@ -7,8 +7,9 @@ import base64
 
 st.set_page_config(page_title="MP4 to WebP 일괄 변환기 (랜덤 파일명)", page_icon="🖼️", layout="centered")
 
-st.title("🖼️양의 WEBP 변환기 (5자리 랜덤파일명, 일괄다운로드 버튼)")
-st.write("여러 MP4 파일을 선택하면 `10000XXXXX.webp` 형태의 무작위 파일명으로 일괄 변환하며 다운로드할 수 있습니다.")
+st.title("🖼️ 양의 WEBP 변환기")
+st.write("10000XXXXX형태의 5자리 랜덤 파일명으로 도출되며 일괄 다운로드 혹은 개별 다운로드를 진행할 수 있습니다.")
+st.write("여러 MP4 파일을 선택하면 일괄 변환하며 다운로드할 수 있습니다.")
 
 # 세션 상태 초기화
 if "converted_files" not in st.session_state:
