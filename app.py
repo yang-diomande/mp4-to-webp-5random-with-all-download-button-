@@ -10,9 +10,11 @@ st.set_page_config(page_title="MP4 to WebP 일괄 변환기 (랜덤 파일명)",
 st.title("🎲 MP4 ➔ WebP 일괄 변환기 (랜덤 파일명)")
 st.write("여러 MP4 파일을 선택하면 `10000XXXXX.webp` 형태의 무작위 파일명으로 일괄 변환합니다.")
 
-# 세션 상태 초기화 (다운로드 시 화면 리셋 방지용)
+# 세션 상태 초기화
 if "converted_files" not in st.session_state:
     st.session_state.converted_files = []
+if "download_trigger" not in st.session_state:
+    st.session_state.download_trigger = False
 
 # 여러 파일 선택 지원
 uploaded_files = st.file_uploader(
@@ -30,15 +32,14 @@ if uploaded_files:
         
         temp_dir = tempfile.mkdtemp()
         st.session_state.converted_files = []
+        st.session_state.download_trigger = False
 
-        # 5자리 랜덤 시작 번호 생성 (첫 자리가 0이 안 나오도록 10000 ~ 99999)
+        # 5자리 랜덤 시작 번호 생성 (10000 ~ 99999)
         start_rand_num = random.randint(10000, 99999)
 
         for idx, uploaded_file in enumerate(uploaded_files):
-            # 10000 + 순차 증가 5자리 숫자 생성
             current_num = start_rand_num + idx
             
-            # 99999를 넘어가면 10000부터 다시 돌도록 오버플로우 처리
             if current_num > 99999:
                 current_num = 10000 + (current_num - 100000)
                 
@@ -83,18 +84,18 @@ if uploaded_files:
         status_text.empty()
         progress_bar.empty()
 
-# 변환 결과 출력
+# 변환 결과 출력 (항상 유지)
 if st.session_state.converted_files:
-    st.success(f"🎉 총 {len(st.session_state.converted_files)}개 파일 변환 및 5자리 랜덤 파일명 지정 완료!")
+    st.success(f"🎉 총 {len(st.session_state.converted_files)}개 파일 변환 완료!")
     st.markdown("---")
     
-    # -------------------------------------------------------------
-    # [신규 기능] ZIP 없이 WebP 개별 파일들을 한 번에 순차 다운로드
-    # -------------------------------------------------------------
     st.subheader("📦 전체 일괄 다운로드")
     
     if st.button("⚡ 변환된 WebP 전체 한 번에 다운로드", use_container_width=True, type="secondary"):
-        # 자바스크립트로 파일들을 0.3초 간격으로 연속 다운로드 Trigger
+        st.session_state.download_trigger = True
+
+    # 일괄 다운로드 자바스크립트 실행
+    if st.session_state.download_trigger:
         js_code = "<script>\n"
         for idx, (output_name, _, file_bytes, _) in enumerate(st.session_state.converted_files):
             b64 = base64.b64encode(file_bytes).decode()
@@ -109,7 +110,8 @@ if st.session_state.converted_files:
             }}, {idx * 300});
             """
         js_code += "</script>"
-        st.components.v1.html(js_code, height=0)
+        st.components.v1.html(js_code, height=1, width=1)
+        st.session_state.download_trigger = False  # 실행 후 트리거 리셋
 
     st.markdown("---")
     st.subheader("📥 개별 다운로드 목록")
