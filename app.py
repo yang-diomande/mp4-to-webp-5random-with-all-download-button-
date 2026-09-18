@@ -19,9 +19,10 @@ if "download_trigger" not in st.session_state:
 
 # 여러 파일 선택 지원
 uploaded_files = st.file_uploader(
-    "변환할 MP4 파일들을 선택하거나 드래그하세요 (여러 개 선택 가능)", 
+    "", 
     type=["mp4"], 
-    accept_multiple_files=True
+    accept_multiple_files=True,
+    label_visibility="collapsed"
 )
 
 if uploaded_files:
